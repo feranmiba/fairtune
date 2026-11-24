@@ -8,3 +8,5 @@ export * from './ai-conversation.schema';
 export * from './royalty-simulation.schema';
 export * from './rights-extraction.schema';
 export * from './contract-comparison.schema';
+export * from './payment.schema';
+export * from './anomaly.schema';

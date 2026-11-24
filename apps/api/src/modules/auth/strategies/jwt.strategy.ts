@@ -40,6 +40,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         emailVerified: true,
         createdAt: true,
         updatedAt: true,
+        artistProfile: true,
       },
     });
 

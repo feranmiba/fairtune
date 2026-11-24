@@ -34,7 +34,13 @@ export class NegotiationAgent implements IAgent<NegotiationAgentInput, Negotiati
   readonly name = 'FairTune Contract Negotiation Copilot';
   readonly description =
     'Provides document-grounded explanations, counter-clause language, and negotiation advice for contracts.';
-  readonly allowedTools = ['retrieve_contract_text', 'compare_contract_clauses'];
+  readonly allowedTools = [
+    'retrieve_contract_text',
+    'compare_contract_clauses',
+    'calculate_royalty_distribution',
+    'retrieve_royalty_earnings',
+    'retrieve_royalty_anomalies',
+  ];
 
   private readonly logger = new Logger(NegotiationAgent.name);
 

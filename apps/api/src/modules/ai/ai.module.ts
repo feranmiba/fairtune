@@ -9,6 +9,8 @@ import { ConversationMemoryService } from './memory/conversation-memory.service'
 import { RoyaltyCalculatorTool } from './tools/implementations/royalty-calculator.tool';
 import { ContractTextRetrieverTool } from './tools/implementations/contract-text-retriever.tool';
 import { ClauseComparisonTool } from './tools/implementations/clause-comparison.tool';
+import { RoyaltyEarningsRetrieverTool } from './tools/implementations/royalty-earnings-retriever.tool';
+import { RoyaltyAnomalyRetrieverTool } from './tools/implementations/royalty-anomaly-retriever.tool';
 import { ToolRegistry } from './tools/tool.registry';
 
 // Agents
@@ -28,6 +30,8 @@ import { RightsIntelligenceAgent } from './agents/rights-agent/rights-intelligen
     RoyaltyCalculatorTool,
     ContractTextRetrieverTool,
     ClauseComparisonTool,
+    RoyaltyEarningsRetrieverTool,
+    RoyaltyAnomalyRetrieverTool,
     ToolRegistry,
     ContractAnalysisAgent,
     NegotiationAgent,
@@ -39,6 +43,8 @@ import { RightsIntelligenceAgent } from './agents/rights-agent/rights-intelligen
     AiUsageService,
     EmbeddingService,
     ConversationMemoryService,
+    RoyaltyEarningsRetrieverTool,
+    RoyaltyAnomalyRetrieverTool,
     ToolRegistry,
     ContractAnalysisAgent,
     NegotiationAgent,

@@ -3,6 +3,8 @@ import { IAgentTool } from './interfaces/tool.interface';
 import { RoyaltyCalculatorTool } from './implementations/royalty-calculator.tool';
 import { ContractTextRetrieverTool } from './implementations/contract-text-retriever.tool';
 import { ClauseComparisonTool } from './implementations/clause-comparison.tool';
+import { RoyaltyEarningsRetrieverTool } from './implementations/royalty-earnings-retriever.tool';
+import { RoyaltyAnomalyRetrieverTool } from './implementations/royalty-anomaly-retriever.tool';
 
 @Injectable()
 export class ToolRegistry {
@@ -13,10 +15,14 @@ export class ToolRegistry {
     royaltyCalculator: RoyaltyCalculatorTool,
     contractTextRetriever: ContractTextRetrieverTool,
     clauseComparison: ClauseComparisonTool,
+    royaltyEarningsRetriever: RoyaltyEarningsRetrieverTool,
+    royaltyAnomalyRetriever: RoyaltyAnomalyRetrieverTool,
   ) {
     this.register(royaltyCalculator);
     this.register(contractTextRetriever);
     this.register(clauseComparison);
+    this.register(royaltyEarningsRetriever);
+    this.register(royaltyAnomalyRetriever);
   }
 
   register(tool: IAgentTool) {

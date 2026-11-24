@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards, UsePipes } from '@nestjs/common';
+import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -24,8 +24,10 @@ export class UsersController {
   @Patch('me')
   @ApiOperation({ summary: 'Update current user personal profile and artist information' })
   @ApiResponse({ status: 200, description: 'User profile updated successfully' })
-  @UsePipes(new ZodValidationPipe(updateUserProfileSchema))
-  async updateProfile(@CurrentUser() user: UserDto, @Body() input: UpdateUserProfileInput) {
+  async updateProfile(
+    @CurrentUser() user: UserDto,
+    @Body(new ZodValidationPipe(updateUserProfileSchema)) input: UpdateUserProfileInput,
+  ) {
     return this.usersService.updateProfile(user.id, input);
   }
 }

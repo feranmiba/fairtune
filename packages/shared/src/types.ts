@@ -8,6 +8,11 @@ import {
   StellarNetwork,
   TransactionStatus,
   ContractClauseCategory,
+  PaymentStatus,
+  ReconciliationStatus,
+  AnomalySeverity,
+  AnomalyReviewStatus,
+  NotificationType,
 } from './enums';
 
 export interface UserDto {
@@ -226,4 +231,116 @@ export interface ApiErrorResponse {
   timestamp: string;
   path: string;
   details?: unknown;
+}
+
+export interface PaymentAssetDto {
+  id: string;
+  code: string;
+  name: string;
+  contractAddress: string;
+  issuerPublicKey: string | null;
+  decimals: number;
+  network: StellarNetwork;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentDto {
+  id: string;
+  agreementId: string;
+  collaboratorId: string | null;
+  recipientAddress: string;
+  amount: string;
+  amountSubunits: string;
+  assetId: string;
+  transactionHash: string | null;
+  status: PaymentStatus;
+  failureReason: string | null;
+  ledgerSequence: number | null;
+  confirmedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  asset?: PaymentAssetDto;
+}
+
+export interface PaymentReconciliationDto {
+  id: string;
+  agreementId: string;
+  expectedBalance: string;
+  observedOnChainBalance: string;
+  totalDeposited: string;
+  totalDistributed: string;
+  status: ReconciliationStatus;
+  discrepancyCount: number;
+  detailsJson?: unknown;
+  reconciledAt: string;
+  findings?: ReconciliationFindingDto[];
+}
+
+export interface ReconciliationFindingDto {
+  id: string;
+  reconciliationId: string;
+  findingType: string;
+  description: string;
+  severity: AnomalySeverity;
+  resolved: boolean;
+  createdAt: string;
+}
+
+export interface RoyaltyAnomalyDto {
+  id: string;
+  agreementId: string;
+  paymentId: string | null;
+  anomalyType: string;
+  severity: AnomalySeverity;
+  detectionReason: string;
+  expectedValue: string | null;
+  observedValue: string | null;
+  aiExplanation: string | null;
+  recommendedActions: string | null;
+  reviewStatus: AnomalyReviewStatus;
+  detectedAt: string;
+}
+
+export interface AnomalyReviewDto {
+  id: string;
+  anomalyId: string;
+  reviewerId: string;
+  previousStatus: AnomalyReviewStatus;
+  newStatus: AnomalyReviewStatus;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface NotificationDto {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: NotificationType;
+  metadataJson: unknown;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface RoyaltyEarningsSummary {
+  totalEarnings: number;
+  totalDistributionsCount: number;
+  currency: string;
+  byTrack: Array<{
+    trackName: string;
+    totalAmount: number;
+    paymentCount: number;
+  }>;
+  byCollaborator: Array<{
+    collaboratorId: string;
+    displayName: string;
+    walletAddress: string;
+    totalAmount: number;
+  }>;
+  byAsset: Array<{
+    assetCode: string;
+    totalAmount: number;
+  }>;
 }

@@ -16,6 +16,8 @@ export const QUEUE_NAMES = {
   ROYALTY_PROCESSING: 'royalty-processing',
   ROYALTY_ANOMALY_ANALYSIS: 'royalty-anomaly-analysis',
   STELLAR_VERIFICATION: 'stellar-verification',
+  PAYMENT_RECONCILIATION: 'payment-reconciliation',
+  STELLAR_MONITORING: 'stellar-monitoring',
 } as const;
 
 export const JOB_NAMES = {
@@ -27,4 +29,6 @@ export const JOB_NAMES = {
   VERIFY_STELLAR_TX: 'verify-stellar-tx',
   DISTRIBUTE_ROYALTIES: 'distribute-royalties',
   DETECT_ROYALTY_ANOMALIES: 'detect-royalty-anomalies',
+  RECONCILE_AGREEMENT: 'reconcile-agreement',
+  POLL_STELLAR_EVENTS: 'poll-stellar-events',
 } as const;

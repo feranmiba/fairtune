@@ -72,6 +72,45 @@ enum StellarTransactionType {
   OTHER
 }
 
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  CONFIRMED
+  FAILED
+  REVERSED
+}
+
+enum ReconciliationStatus {
+  MATCHED
+  MISMATCHED
+  INCOMPLETE
+  PENDING_REVIEW
+}
+
+enum AnomalySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AnomalyReviewStatus {
+  PENDING
+  IN_REVIEW
+  RESOLVED
+  FALSE_POSITIVE
+}
+
+enum NotificationType {
+  DEPOSIT_CONFIRMED
+  DISTRIBUTION_COMPLETED
+  PAYMENT_FAILED
+  PAYMENT_RECEIVED
+  DISCREPANCY_DETECTED
+  ANOMALY_DETECTED
+  SYSTEM
+}
+
 enum AIMessageSender {
   USER
   ASSISTANT
@@ -131,6 +170,8 @@ model User {
   aiUsageLogs   AIUsageLog[]
   comparisons   ContractComparison[]
   simulations   RoyaltySimulationRecord[]
+  anomalyReviews AnomalyReview[]
+  notifications Notification[]
 
   @@index([email])
 }
@@ -397,6 +438,9 @@ model RoyaltyAgreement {
   creator             User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   participants        AgreementParticipant[]
   transactions        Transaction[]
+  payments            Payment[]
+  reconciliations     PaymentReconciliation[]
+  anomalies           RoyaltyAnomaly[]
 
   @@index([creatorId])
   @@index([status])
@@ -413,6 +457,7 @@ model Collaborator {
 
   user          User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
   participations AgreementParticipant[]
+  payments       Payment[]
 
   @@index([walletAddress])
 }
@@ -469,4 +514,158 @@ model RoyaltySimulationRecord {
   user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model PaymentAsset {
+  id              String         @id @default(uuid())
+  code            String
+  name            String
+  contractAddress String         @unique
+  issuerPublicKey String?
+  decimals        Int            @default(7)
+  network         StellarNetwork @default(TESTNET)
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  payments        Payment[]
+
+  @@index([code])
+  @@index([network])
+  @@index([isActive])
+}
+
+model Payment {
+  id               String           @id @default(uuid())
+  agreementId      String
+  collaboratorId   String?
+  recipientAddress String
+  amount           Decimal          @db.Decimal(18, 7)
+  amountSubunits   String           // Integer string in atomic stroop/subunit units
+  assetId          String
+  transactionHash  String?
+  status           PaymentStatus    @default(PENDING)
+  failureReason    String?          @db.Text
+  ledgerSequence   Int?
+  confirmedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  agreement        RoyaltyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  collaborator     Collaborator?    @relation(fields: [collaboratorId], references: [id], onDelete: SetNull)
+  asset            PaymentAsset     @relation(fields: [assetId], references: [id])
+  anomalies        RoyaltyAnomaly[]
+
+  @@unique([transactionHash, recipientAddress])
+  @@index([agreementId])
+  @@index([collaboratorId])
+  @@index([recipientAddress])
+  @@index([status])
+  @@index([transactionHash])
+  @@index([createdAt])
+}
+
+model StellarMonitoringCheckpoint {
+  id                 String   @id @default(uuid())
+  contractAddress    String   @unique
+  lastPagingToken    String?
+  lastLedgerSequence Int      @default(0)
+  updatedAt          DateTime @updatedAt
+
+  @@index([contractAddress])
+}
+
+model PaymentReconciliation {
+  id                     String                  @id @default(uuid())
+  agreementId            String
+  expectedBalance        Decimal                 @db.Decimal(18, 7)
+  observedOnChainBalance Decimal                 @db.Decimal(18, 7)
+  totalDeposited         Decimal                 @db.Decimal(18, 7)
+  totalDistributed       Decimal                 @db.Decimal(18, 7)
+  status                 ReconciliationStatus    @default(MATCHED)
+  discrepancyCount       Int                     @default(0)
+  detailsJson            Json?
+  reconciledAt           DateTime                @default(now())
+
+  agreement              RoyaltyAgreement        @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  findings               ReconciliationFinding[]
+
+  @@index([agreementId])
+  @@index([status])
+  @@index([reconciledAt])
+}
+
+model ReconciliationFinding {
+  id               String                @id @default(uuid())
+  reconciliationId String
+  findingType      String
+  description      String                @db.Text
+  severity         AnomalySeverity       @default(MEDIUM)
+  resolved         Boolean               @default(false)
+  createdAt        DateTime              @default(now())
+
+  reconciliation   PaymentReconciliation @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+
+  @@index([reconciliationId])
+  @@index([findingType])
+  @@index([resolved])
+}
+
+model RoyaltyAnomaly {
+  id                 String              @id @default(uuid())
+  agreementId        String
+  paymentId          String?
+  anomalyType        String
+  severity           AnomalySeverity     @default(MEDIUM)
+  detectionReason    String              @db.Text
+  expectedValue      String?
+  observedValue      String?
+  aiExplanation      String?             @db.Text
+  recommendedActions String?             @db.Text
+  reviewStatus       AnomalyReviewStatus @default(PENDING)
+  detectedAt         DateTime            @default(now())
+
+  agreement          RoyaltyAgreement    @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  payment            Payment?            @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  reviews            AnomalyReview[]
+
+  @@index([agreementId])
+  @@index([paymentId])
+  @@index([severity])
+  @@index([reviewStatus])
+  @@index([detectedAt])
+}
+
+model AnomalyReview {
+  id             String              @id @default(uuid())
+  anomalyId      String
+  reviewerId     String
+  previousStatus AnomalyReviewStatus
+  newStatus      AnomalyReviewStatus
+  notes          String?             @db.Text
+  createdAt      DateTime            @default(now())
+
+  anomaly        RoyaltyAnomaly      @relation(fields: [anomalyId], references: [id], onDelete: Cascade)
+  reviewer       User                @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([anomalyId])
+  @@index([reviewerId])
+}
+
+model Notification {
+  id           String           @id @default(uuid())
+  userId       String
+  title        String
+  message      String           @db.Text
+  type         NotificationType @default(SYSTEM)
+  metadataJson Json?
+  read         Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([type])
+  @@index([createdAt])
 }

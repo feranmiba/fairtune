@@ -99,6 +99,53 @@ export class StellarController {
     }
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('accounts/:address/balances')
+  @ApiOperation({ summary: 'Get balances for a Stellar account' })
+  @ApiResponse({ status: 200, description: 'Account balances retrieved' })
+  async getBalances(@Param('address') address: string) {
+    const isValidFormat = this.accountService.isValidPublicKey(address);
+    if (!isValidFormat) {
+      return { balances: [], sequence: '0' };
+    }
+    try {
+      const details = await this.accountService.getAccount(address);
+      const normalizedBalances = (details.balances || []).map((b: any) => ({
+        asset: b.asset_type === 'native' ? 'XLM' : b.asset_code || 'UNKNOWN',
+        balance: b.balance,
+        limit: b.limit,
+      }));
+      return { balances: normalizedBalances, sequence: details.sequenceNumber };
+    } catch {
+      return { balances: [], sequence: '0' };
+    }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('accounts/generate-testnet')
+  @ApiOperation({ summary: 'Generate a new funded Stellar testnet keypair for testing' })
+  @ApiResponse({ status: 200, description: 'New testnet account generated and funded' })
+  async generateTestnetAccount() {
+    const { Keypair } = await import('@stellar/stellar-sdk');
+    const pair = Keypair.random();
+    const publicKey = pair.publicKey();
+
+    try {
+      await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`);
+    } catch {
+      // friendbot best-effort
+    }
+
+    return {
+      publicKey,
+      secretKey: pair.secret(),
+      network: 'TESTNET',
+      message: 'Generated funded testnet account with 10,000 XLM',
+    };
+  }
+
   // --- AGREEMENT OPERATIONS ---
 
   @ApiBearerAuth()

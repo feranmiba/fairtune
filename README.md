@@ -60,6 +60,12 @@ fairtune/
 │   ├── smart-contract-design.md# Soroban smart contract design, state machine & math
 │   ├── deployment-guide.md   # Contract compilation, testnet deploy & operations
 │   ├── stellar-api.md        # Stellar & Soroban REST API reference
+│   ├── payment-infrastructure.md # Payment lifecycle, tokens, decimals & asset registry
+│   ├── stellar-monitoring.md # Soroban event monitoring & cursor synchronization
+│   ├── payment-reconciliation.md # Deterministic reconciliation & financial invariants
+│   ├── royalty-intelligence.md # Historical earnings analysis & forward projections
+│   ├── anomaly-detection.md  # Anomaly detection rules, AI explainability & review
+│   ├── phase-4-testing.md    # Phase 4 testing suite & verification guide
 │   ├── database-schema.md    # Relational schema, constraints, and indexes
 │   ├── api-specification.md  # API v1 conventions and endpoint catalog
 │   └── development-workflow.md# Developer setup and branch hygiene
@@ -157,7 +163,11 @@ API endpoints are versioned with the `/api/v1` prefix:
 - **Documents (Ingestion & Extraction):** `POST /api/v1/documents`, `GET /api/v1/documents`, `GET /api/v1/documents/:id`, `GET /api/v1/documents/:id/status`, `GET /api/v1/documents/:id/text`, `POST /api/v1/documents/:id/retry`, `DELETE /api/v1/documents/:id`
 - **Contract Analysis & Version Comparison:** `POST /api/v1/contract-analysis/:documentId`, `GET /api/v1/contract-analysis/:id`, `GET /api/v1/contract-analysis/document/:documentId`, `POST /api/v1/contract-analysis/compare`
 - **Negotiation Copilot & SSE Streaming:** `POST /api/v1/negotiation/conversations`, `GET /api/v1/negotiation/conversations`, `GET /api/v1/negotiation/conversations/:id`, `POST /api/v1/negotiation/conversations/:id/messages`, `GET /api/v1/negotiation/conversations/:id/stream`, `POST /api/v1/negotiation/conversations/:id/stream`
-- **AI Royalty Intelligence & Forecasting:** `POST /api/v1/royalty-intelligence/simulate`, `POST /api/v1/royalty-intelligence/simulate/save`, `GET /api/v1/royalty-intelligence/simulations`, `GET /api/v1/royalty-intelligence/simulations/:id`, `POST /api/v1/royalty-intelligence/forecast`, `GET /api/v1/royalty-intelligence/anomalies/:agreementId`
+- **AI Royalty Intelligence & Forecasting:** `POST /api/v1/royalty-intelligence/simulate`, `POST /api/v1/royalty-intelligence/simulate/save`, `GET /api/v1/royalty-intelligence/simulations`, `GET /api/v1/royalty-intelligence/simulations/:id`, `POST /api/v1/royalty-intelligence/forecast`, `GET /api/v1/royalty-intelligence/earnings/summary`, `GET /api/v1/royalty-intelligence/earnings/by-track`, `GET /api/v1/royalty-intelligence/earnings/by-collaborator`, `POST /api/v1/royalty-intelligence/anomalies/detect/:agreementId`, `GET /api/v1/royalty-intelligence/anomalies`, `GET /api/v1/royalty-intelligence/anomalies/detail/:id`, `POST /api/v1/royalty-intelligence/anomalies/:id/review`
+- **Payments & Assets:** `POST /api/v1/payments/assets`, `GET /api/v1/payments/assets`, `GET /api/v1/payments/assets/:id`, `GET /api/v1/payments`, `GET /api/v1/payments/:id`, `GET /api/v1/payments/agreements/:agreementId`, `GET /api/v1/payments/collaborators/:collaboratorId`
+- **Blockchain Monitoring:** `GET /api/v1/monitoring/status`, `POST /api/v1/monitoring/sync`
+- **Payment Reconciliation:** `POST /api/v1/reconciliation/agreements/:agreementId`, `GET /api/v1/reconciliation/agreements/:agreementId`, `GET /api/v1/reconciliation/history`, `GET /api/v1/reconciliation/discrepancies`
+- **Notifications:** `GET /api/v1/notifications`, `PATCH /api/v1/notifications/:id/read`, `POST /api/v1/notifications/read-all`
 - **Rights Intelligence:** `POST /api/v1/rights-intelligence/extract/:documentId`
 - **Royalty Agreements:** `POST /api/v1/royalty-agreements`, `GET /api/v1/royalty-agreements`, `GET /api/v1/royalty-agreements/:id`
 - **Stellar & Soroban Blockchain:** `GET /api/v1/stellar/network/status`, `GET /api/v1/stellar/accounts/:publicKey`, `POST /api/v1/stellar/accounts/friendbot`, `GET /api/v1/stellar/contracts/config`, `GET /api/v1/stellar/contracts/agreement/:agreementId`, `POST /api/v1/stellar/transactions/prepare-create-agreement`, `POST /api/v1/stellar/transactions/prepare-approve-agreement`, `POST /api/v1/stellar/transactions/prepare-deposit-escrow`, `POST /api/v1/stellar/transactions/prepare-distribute-royalties`, `POST /api/v1/stellar/transactions/prepare-cancel-agreement`, `POST /api/v1/stellar/transactions/simulate`, `POST /api/v1/stellar/transactions/submit`, `GET /api/v1/stellar/transactions/:hash`, `POST /api/v1/stellar/agreements/:agreementId/sync`
@@ -176,4 +186,5 @@ API endpoints are versioned with the `/api/v1` prefix:
 ## 9. License
 
 MIT
+
 # fairtune

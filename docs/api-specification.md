@@ -428,7 +428,119 @@ Reconciles on-chain Soroban agreement state to PostgreSQL models.
 
 ---
 
-### 2.10 Health Check (`/api/v1/health`)
+### 2.10 Payments & Assets (`/api/v1/payments`)
+
+#### `POST /api/v1/payments/assets`
+
+Registers a new token asset contract in the registry.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/payments/assets`
+
+Lists all active registered payment assets.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/payments/assets/:id`
+
+Retrieves metadata for a specific payment asset by ID.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/payments`
+
+Lists paginated payment history with filters by agreement, collaborator, status, or recipient.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/payments/:id`
+
+Retrieves payment details, on-chain transaction hash, and ledger confirmation sequence.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/payments/agreements/:agreementId`
+
+Retrieves all collaborator payments executed under an agreement.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/payments/collaborators/:collaboratorId`
+
+Retrieves all payments received by a collaborator.
+
+- **Access:** Authenticated
+
+---
+
+### 2.11 Blockchain Monitoring (`/api/v1/monitoring`)
+
+#### `GET /api/v1/monitoring/status`
+
+Retrieves Soroban event monitoring status, cursor ledger sequence, and RPC health.
+
+- **Access:** Authenticated
+
+#### `POST /api/v1/monitoring/sync`
+
+Triggers an immediate polling pass of contract events since the last ledger checkpoint.
+
+- **Access:** Authenticated (Admin/Artist)
+
+---
+
+### 2.12 Payment Reconciliation (`/api/v1/reconciliation`)
+
+#### `POST /api/v1/reconciliation/agreements/:agreementId`
+
+Executes a deterministic reconciliation audit comparing on-chain escrow/distribution vs database payments.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/reconciliation/agreements/:agreementId`
+
+Retrieves the latest reconciliation audit report for an agreement.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/reconciliation/history`
+
+Lists historical reconciliation reports.
+
+- **Access:** Authenticated
+
+#### `GET /api/v1/reconciliation/discrepancies`
+
+Lists all unresolved discrepancy findings across authorized agreements.
+
+- **Access:** Authenticated
+
+---
+
+### 2.13 Notifications (`/api/v1/notifications`)
+
+#### `GET /api/v1/notifications`
+
+Lists notifications for the current authenticated user.
+
+- **Access:** Authenticated
+
+#### `PATCH /api/v1/notifications/:id/read`
+
+Marks a notification as read.
+
+- **Access:** Authenticated
+
+#### `POST /api/v1/notifications/read-all`
+
+Marks all notifications as read for the user.
+
+- **Access:** Authenticated
+
+---
+
+### 2.14 Health Check (`/api/v1/health`)
 
 #### `GET /api/v1/health`
 

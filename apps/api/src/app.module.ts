@@ -25,6 +25,10 @@ import { RightsIntelligenceModule } from './modules/rights-intelligence/rights-i
 import { RoyaltyAgreementsModule } from './modules/royalty-agreements/royalty-agreements.module';
 import { CollaboratorsModule } from './modules/collaborators/collaborators.module';
 import { StellarModule } from './modules/stellar/stellar.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { MonitoringModule } from './modules/monitoring/monitoring.module';
+import { ReconciliationModule } from './modules/reconciliation/reconciliation.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
@@ -80,6 +84,10 @@ import { HealthModule } from './modules/health/health.module';
     RoyaltyAgreementsModule,
     CollaboratorsModule,
     StellarModule,
+    PaymentsModule,
+    MonitoringModule,
+    ReconciliationModule,
+    NotificationsModule,
     HealthModule,
   ],
   providers: [
