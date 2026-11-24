@@ -1,0 +1,472 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  ARTIST
+  COLLABORATOR
+  LEGAL_ADVISOR
+  ADMIN
+}
+
+enum DocumentStatus {
+  PENDING
+  UPLOADED
+  PROCESSING
+  EXTRACTED
+  READY
+  ANALYZED
+  FAILED
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AgreementStatus {
+  DRAFT
+  PENDING_APPROVAL
+  ACTIVE
+  REJECTED
+  TERMINATED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum StellarNetwork {
+  TESTNET
+  PUBLIC
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum StellarTransactionType {
+  AGREEMENT_CREATION
+  COLLABORATOR_APPROVAL
+  ESCROW_DEPOSIT
+  ROYALTY_DISTRIBUTION
+  AGREEMENT_CANCELLATION
+  OTHER
+}
+
+enum AIMessageSender {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AITaskType {
+  CONTRACT_ANALYSIS
+  NEGOTIATION
+  ROYALTY_SIMULATION
+  RIGHTS_EXTRACTION
+  EMBEDDING
+  CONTRACT_COMPARISON
+}
+
+enum AIExecutionStatus {
+  SUCCESS
+  FAILED
+}
+
+enum ContractClauseCategory {
+  RIGHTS_GRANT
+  ROYALTY_SPLIT
+  TERMINATION
+  RECOUPMENT
+  EXCLUSIVITY
+  WARRANTIES_INDEMNITY
+  ACCOUNTING_AUDIT
+  GOVERNING_LAW
+  OTHER
+}
+
+enum ContractFindingType {
+  RISK_ALERT
+  UNFAVOURABLE_TERM
+  MISSING_TERM
+  AMBIGUOUS_TERM
+}
+
+model User {
+  id            String             @id @default(uuid())
+  email         String             @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          UserRole           @default(ARTIST)
+  emailVerified Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  artistProfile ArtistProfile?
+  documents     Document[]
+  refreshTokens RefreshToken[]
+  agreements    RoyaltyAgreement[]
+  collaborator  Collaborator?
+  conversations AIConversation[]
+  aiUsageLogs   AIUsageLog[]
+  comparisons   ContractComparison[]
+  simulations   RoyaltySimulationRecord[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id              String    @id @default(uuid())
+  userId          String
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  replacedByToken String?
+  createdAt       DateTime  @default(now())
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model ArtistProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  stageName    String
+  bio          String?  @db.Text
+  profileImage String?
+  country      String?  @db.VarChar(3)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id               String               @id @default(uuid())
+  userId           String
+  title            String
+  originalFileName String
+  storageKey       String               @unique
+  mimeType         String
+  fileSize         Int
+  status           DocumentStatus       @default(PENDING)
+  pageCount        Int?
+  extractedText    String?              @db.Text
+  errorMessage     String?              @db.Text
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis         ContractAnalysis?
+  conversations    AIConversation[]
+  chunks           DocumentChunk[]
+  clauses          ContractClause[]
+  findings         ContractFinding[]
+  references       AIMessageReference[]
+  sourceComparisons ContractComparison[] @relation("SourceDocComparisons")
+  targetComparisons ContractComparison[] @relation("TargetDocComparisons")
+
+  @@index([userId])
+  @@index([storageKey])
+}
+
+model ContractAnalysis {
+  id               String         @id @default(uuid())
+  documentId       String         @unique
+  userId           String
+  status           AnalysisStatus @default(PENDING)
+  summary          String?        @db.Text
+  overallRiskLevel RiskLevel?
+  analysisResult   Json?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  document         Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ContractClause {
+  id                     String                 @id @default(uuid())
+  documentId             String
+  chunkId                String?
+  clauseTitle            String
+  category               ContractClauseCategory @default(OTHER)
+  extractedText          String                 @db.Text
+  explanation            String                 @db.Text
+  riskLevel              RiskLevel              @default(LOW)
+  riskJustification      String                 @db.Text
+  suggestedCounterClause String?                @db.Text
+  pageNumber             Int?
+  createdAt              DateTime               @default(now())
+
+  document               Document               @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunk                  DocumentChunk?         @relation(fields: [chunkId], references: [id], onDelete: SetNull)
+  references             AIMessageReference[]
+
+  @@index([documentId])
+  @@index([category])
+  @@index([riskLevel])
+}
+
+model ContractFinding {
+  id            String              @id @default(uuid())
+  documentId    String
+  findingType   ContractFindingType @default(RISK_ALERT)
+  severity      RiskLevel           @default(MEDIUM)
+  title         String
+  description   String              @db.Text
+  sourceExcerpt String?             @db.Text
+  pageNumber    Int?
+  remediation   String?             @db.Text
+  createdAt     DateTime            @default(now())
+
+  document      Document            @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([severity])
+}
+
+model DocumentChunk {
+  id          String              @id @default(uuid())
+  documentId  String
+  chunkIndex  Int
+  content     String              @db.Text
+  pageNumber  Int?
+  tokenCount  Int                 @default(0)
+  createdAt   DateTime            @default(now())
+
+  document    Document            @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  embedding   DocumentEmbedding?
+  clauses     ContractClause[]
+  references  AIMessageReference[]
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId])
+}
+
+model DocumentEmbedding {
+  id         String        @id @default(uuid())
+  chunkId    String        @unique
+  embedding  Json          // Vector array representation (e.g., float[1536])
+  model      String
+  dimensions Int
+  createdAt  DateTime      @default(now())
+
+  chunk      DocumentChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@index([chunkId])
+}
+
+model AIConversation {
+  id            String       @id @default(uuid())
+  userId        String
+  documentId    String?
+  title         String
+  systemContext String?      @db.Text
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document      Document?    @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  messages      AIMessage[]
+
+  @@index([userId])
+  @@index([documentId])
+}
+
+model AIMessage {
+  id               String               @id @default(uuid())
+  conversationId   String
+  sender           AIMessageSender      @default(USER)
+  content          String               @db.Text
+  role             String               @default("user")
+  promptTokens     Int                  @default(0)
+  completionTokens Int                  @default(0)
+  totalTokens      Int                  @default(0)
+  model            String?
+  createdAt        DateTime             @default(now())
+
+  conversation     AIConversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  references       AIMessageReference[]
+
+  @@index([conversationId])
+}
+
+model AIMessageReference {
+  id             String          @id @default(uuid())
+  messageId      String
+  documentId     String
+  chunkId        String?
+  clauseId       String?
+  sourcePage     Int?
+  sourceExcerpt  String          @db.Text
+  relevanceScore Decimal?        @db.Decimal(5, 4)
+  createdAt      DateTime        @default(now())
+
+  message        AIMessage       @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  document       Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunk          DocumentChunk?  @relation(fields: [chunkId], references: [id], onDelete: SetNull)
+  clause         ContractClause? @relation(fields: [clauseId], references: [id], onDelete: SetNull)
+
+  @@index([messageId])
+  @@index([documentId])
+}
+
+model AIUsageLog {
+  id               String            @id @default(uuid())
+  userId           String
+  taskType         AITaskType
+  provider         String
+  model            String
+  promptTokens     Int               @default(0)
+  completionTokens Int               @default(0)
+  totalTokens      Int               @default(0)
+  estimatedCostUsd Decimal           @default(0) @db.Decimal(10, 6)
+  durationMs       Int               @default(0)
+  status           AIExecutionStatus @default(SUCCESS)
+  errorMessage     String?           @db.Text
+  createdAt        DateTime          @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([taskType])
+  @@index([createdAt])
+}
+
+model ContractComparison {
+  id               String   @id @default(uuid())
+  userId           String
+  sourceDocumentId String
+  targetDocumentId String
+  summary          String   @db.Text
+  differences      Json
+  createdAt        DateTime @default(now())
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceDocument   Document @relation("SourceDocComparisons", fields: [sourceDocumentId], references: [id], onDelete: Cascade)
+  targetDocument   Document @relation("TargetDocComparisons", fields: [targetDocumentId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sourceDocumentId])
+  @@index([targetDocumentId])
+}
+
+model RoyaltyAgreement {
+  id                  String                 @id @default(uuid())
+  creatorId           String
+  title               String
+  trackName           String
+  description         String?                @db.Text
+  status              AgreementStatus        @default(DRAFT)
+  totalAllocation     Decimal                @default(100.00) @db.Decimal(5, 2)
+  stellarNetwork      StellarNetwork         @default(TESTNET)
+  contractAddress     String?
+  onChainAgreementId  String?
+  metadataHash        String?
+  paymentTokenAddress String?
+  onChainStatus       String?
+  lastSyncedLedger    Int?
+  lastSyncedAt        DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  creator             User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  participants        AgreementParticipant[]
+  transactions        Transaction[]
+
+  @@index([creatorId])
+  @@index([status])
+  @@index([onChainAgreementId])
+}
+
+model Collaborator {
+  id            String                 @id @default(uuid())
+  userId        String?                @unique
+  displayName   String
+  walletAddress String
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  user          User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  participations AgreementParticipant[]
+
+  @@index([walletAddress])
+}
+
+model AgreementParticipant {
+  id                String           @id @default(uuid())
+  agreementId       String
+  collaboratorId    String
+  royaltyPercentage Decimal          @db.Decimal(5, 2)
+  approvalStatus    ApprovalStatus   @default(PENDING)
+  approvedAt        DateTime?
+  onChainApproved   Boolean          @default(false)
+  onChainTxHash     String?
+
+  agreement         RoyaltyAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  collaborator      Collaborator     @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+
+  @@unique([agreementId, collaboratorId])
+  @@index([agreementId])
+  @@index([collaboratorId])
+}
+
+model Transaction {
+  id              String                 @id @default(uuid())
+  agreementId     String
+  transactionHash String                 @unique
+  transactionType StellarTransactionType @default(OTHER)
+  assetCode       String                 @default("XLM")
+  amount          Decimal                @db.Decimal(18, 7)
+  status          TransactionStatus      @default(PENDING)
+  ledgerSequence  Int?
+  unsignedXdr     String?                @db.Text
+  createdAt       DateTime               @default(now())
+
+  agreement       RoyaltyAgreement       @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  @@index([agreementId])
+  @@index([transactionHash])
+  @@index([transactionType])
+}
+
+model RoyaltySimulationRecord {
+  id                      String   @id @default(uuid())
+  userId                  String
+  title                   String?
+  grossRevenue            Decimal  @db.Decimal(18, 2)
+  recoupableExpenses      Decimal  @default(0) @db.Decimal(18, 2)
+  netDistributableRevenue Decimal  @db.Decimal(18, 2)
+  currency                String   @default("USD")
+  participantsJson        Json
+  notesJson               Json?
+  createdAt               DateTime @default(now())
+
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

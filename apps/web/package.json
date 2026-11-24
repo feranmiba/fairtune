@@ -1,0 +1,13 @@
+{
+  "name": "@fairtune/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FairTune Web Application (Reserved for Frontend - Phase 2)",
+  "scripts": {
+    "dev": "echo 'Frontend development reserved for Phase 2'",
+    "build": "echo 'Frontend build reserved for Phase 2'",
+    "lint": "echo 'Frontend lint reserved for Phase 2'",
+    "typecheck": "echo 'Frontend typecheck reserved for Phase 2'",
+    "test": "echo 'Frontend tests reserved for Phase 2'"
+  }
+}
