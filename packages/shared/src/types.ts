@@ -97,6 +97,8 @@ export interface RoyaltyAgreementDto {
   totalAllocation: number; // e.g., 100.00
   stellarNetwork: StellarNetwork;
   contractAddress: string | null;
+  onChainAgreementId?: string | null;
+  paymentTokenAddress?: string | null;
   participants: AgreementParticipantDto[];
   createdAt: string;
   updatedAt: string;

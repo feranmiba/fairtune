@@ -201,7 +201,7 @@ export const RoyaltyAnalyticsPage: React.FC = () => {
                         <div key={idx} className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-200">{t.trackTitle}</span>
                           <span className="font-mono text-emerald-400 font-bold">
-                            ${t.totalEarnings.toFixed(2)}
+                            ${Number(t.totalEarnings || 0).toFixed(2)}
                           </span>
                         </div>
                       ))}
@@ -223,7 +223,7 @@ export const RoyaltyAnalyticsPage: React.FC = () => {
                         <div key={idx} className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-200">{c.collaboratorName}</span>
                           <span className="font-mono text-brand-gold font-bold">
-                            ${c.totalEarnings.toFixed(2)}
+                            ${Number(c.totalEarnings || 0).toFixed(2)}
                           </span>
                         </div>
                       ))}
@@ -339,7 +339,7 @@ export const RoyaltyAnalyticsPage: React.FC = () => {
                   <div className="p-3.5 rounded-lg bg-surface-elevated border border-border-subtle flex justify-between items-center font-mono">
                     <span className="text-slate-400">Net Distributable:</span>
                     <span className="font-bold text-emerald-400 text-sm">
-                      ${simResult.distributableRevenue.toFixed(2)}
+                      ${Number(simResult.distributableRevenue || 0).toFixed(2)}
                     </span>
                   </div>
 
@@ -358,7 +358,7 @@ export const RoyaltyAnalyticsPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="font-mono font-bold text-brand-gold text-sm">
-                          ${alloc.amount.toFixed(2)}
+                          ${Number(alloc.amount || 0).toFixed(2)}
                         </div>
                       </div>
                     ))}
@@ -444,7 +444,7 @@ export const RoyaltyAnalyticsPage: React.FC = () => {
                   </div>
                   <p className="text-[11px] text-slate-500 mt-1">
                     Average gross: $
-                    {forecastResult.historicalFacts.averageHistoricalGrossPerPeriod.toFixed(2)}/mo
+                    {Number(forecastResult.historicalFacts.averageHistoricalGrossPerPeriod || 0).toFixed(2)}/mo
                   </p>
                 </Card>
               </div>
@@ -469,7 +469,7 @@ export const RoyaltyAnalyticsPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="font-mono font-bold text-brand-gold text-sm">
-                        ${part.cumulativeProjectedEarnings.toFixed(2)}
+                        ${Number(part.cumulativeProjectedEarnings || 0).toFixed(2)}
                       </div>
                     </div>
                   ))}

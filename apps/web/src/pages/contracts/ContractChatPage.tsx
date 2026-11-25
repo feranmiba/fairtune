@@ -17,6 +17,7 @@ import {
   ArrowLeft,
   Loader2,
   Plus,
+  ShieldAlert,
 } from 'lucide-react';
 
 export const ContractChatPage: React.FC = () => {
@@ -297,6 +298,15 @@ export const ContractChatPage: React.FC = () => {
               </div>
             )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Legal Notice */}
+          <div className="px-4 py-1.5 bg-surface-subtle/30 border-t border-border-subtle/50 flex items-center justify-between text-[11px] text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <ShieldAlert className="w-3.5 h-3.5 text-amber-500/80 shrink-0" />
+              <span>FairTune provides rights analysis, not formal legal advice. Verify critical terms with counsel before signing.</span>
+            </span>
+            <span className="hidden sm:inline text-[10px] text-slate-600 font-mono">Grounded Intelligence</span>
           </div>
 
           {/* Chat Input Bar */}

@@ -39,4 +39,62 @@ export class RoyaltyAgreementsController {
   async getById(@CurrentUser() user: UserDto, @Param('id') id: string) {
     return this.royaltyService.getAgreementById(user.id, id);
   }
+
+  @Post(':id/submit')
+  @ApiOperation({ summary: 'Submit a draft agreement for collaborator approvals' })
+  @ApiResponse({ status: 200, description: 'Agreement submitted for approvals' })
+  async submit(@CurrentUser() user: UserDto, @Param('id') id: string) {
+    return this.royaltyService.submitAgreement(user.id, id);
+  }
+
+  @Post(':id/approve')
+  @ApiOperation({ summary: 'Approve a pending royalty agreement' })
+  @ApiResponse({ status: 200, description: 'Agreement approved' })
+  async approve(
+    @CurrentUser() user: UserDto,
+    @Param('id') id: string,
+    @Body() body?: { notes?: string },
+  ) {
+    return this.royaltyService.approveAgreement(user.id, id, body?.notes);
+  }
+
+  @Post(':id/activate')
+  @ApiOperation({ summary: 'Activate an agreement on-chain' })
+  @ApiResponse({ status: 200, description: 'Agreement activated' })
+  async activate(@CurrentUser() user: UserDto, @Param('id') id: string) {
+    return this.royaltyService.activateAgreement(user.id, id);
+  }
+
+  @Post(':id/cancel')
+  @ApiOperation({ summary: 'Terminate/cancel a royalty agreement' })
+  @ApiResponse({ status: 200, description: 'Agreement cancelled' })
+  async cancel(
+    @CurrentUser() user: UserDto,
+    @Param('id') id: string,
+    @Body() body?: { reason?: string },
+  ) {
+    return this.royaltyService.cancelAgreement(user.id, id, body?.reason);
+  }
+
+  @Post(':id/deposit')
+  @ApiOperation({ summary: 'Deposit revenue into agreement escrow' })
+  @ApiResponse({ status: 200, description: 'Escrow revenue deposited' })
+  async deposit(
+    @CurrentUser() user: UserDto,
+    @Param('id') id: string,
+    @Body() body: { amount: string; asset?: string },
+  ) {
+    return this.royaltyService.depositEscrow(user.id, id, body.amount, body.asset || 'XLM');
+  }
+
+  @Post(':id/distribute')
+  @ApiOperation({ summary: 'Distribute escrow revenue to collaborators' })
+  @ApiResponse({ status: 200, description: 'Royalties distributed' })
+  async distribute(
+    @CurrentUser() user: UserDto,
+    @Param('id') id: string,
+    @Body() body?: { amount?: string },
+  ) {
+    return this.royaltyService.distributeRoyalties(user.id, id, body?.amount);
+  }
 }

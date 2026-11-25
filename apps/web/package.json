@@ -12,6 +12,7 @@
     "test": "echo 'Frontend unit tests passing'"
   },
   "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "^2.8.0",
     "@fairtune/shared": "workspace:*",
     "@fairtune/validation": "workspace:*",
     "clsx": "^2.1.1",

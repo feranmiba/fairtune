@@ -5,7 +5,7 @@ export function buildNegotiationPrompt(
   referencedClauses?: string[],
 ): string {
   const context = referencedClauses?.length
-    ? `\nRELEVANT CONTRACT CLAUSES REFERENCED:\n${referencedClauses.join('\n---\n')}\n`
+    ? `\n<untrusted_contract_excerpts>\n${referencedClauses.join('\n---\n')}\n</untrusted_contract_excerpts>\n`
     : '\nNO SPECIFIC CONTRACT CLAUSES MATCHED OR PROVIDED.\n';
 
   return `

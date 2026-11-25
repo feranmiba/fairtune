@@ -46,6 +46,7 @@ export const AgreementDetailPage: React.FC = () => {
   const loadAgreement = async () => {
     if (!id) return;
     setIsLoading(true);
+    setActionError(null);
     try {
       const data = await agreementsApi.getById(id);
       setAgreement(data);
@@ -70,25 +71,45 @@ export const AgreementDetailPage: React.FC = () => {
 
   if (!agreement) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 max-w-lg mx-auto">
+        {actionError && (
+          <div className="mb-4 text-left">
+            <Alert variant="danger" title="Unable to Load Agreement">
+              {actionError}
+            </Alert>
+          </div>
+        )}
         <h2 className="text-lg font-semibold text-slate-100">Agreement not found</h2>
-        <Link to="/agreements" className="mt-4 inline-block">
-          <Button size="sm" variant="secondary">
-            Return to agreements
+        <p className="text-xs text-slate-400 mt-1">
+          This agreement could not be loaded, or you do not have permission to view it.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Button size="sm" variant="secondary" onClick={() => loadAgreement()}>
+            Retry
           </Button>
-        </Link>
+          <Link to="/agreements">
+            <Button size="sm" variant="primary">
+              Return to agreements
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
 
+  const participants = agreement.participants || [];
+
   // Check if current user is an unapproved collaborator
-  const currentParticipant = agreement.participants.find(
-    (p) => p.collaborator?.walletAddress === publicKey,
+  const currentParticipant = participants.find(
+    (p) =>
+      p.collaborator?.walletAddress &&
+      publicKey &&
+      p.collaborator.walletAddress.toLowerCase() === publicKey.toLowerCase(),
   );
   const canApprove =
     isConnected &&
-    currentParticipant &&
-    currentParticipant.approvalStatus !== ApprovalStatus.APPROVED &&
+    Boolean(currentParticipant) &&
+    currentParticipant?.approvalStatus !== ApprovalStatus.APPROVED &&
     agreement.status === AgreementStatus.PENDING_APPROVAL;
 
   // 1. Submit for approval
@@ -106,9 +127,79 @@ export const AgreementDetailPage: React.FC = () => {
     }
   };
 
-  // 2. Sign approval on-chain with Freighter
+  // 2. Register agreement on Soroban Testnet
+  const handleRegisterOnChain = async () => {
+    if (!publicKey) {
+      connectWallet();
+      return;
+    }
+    setIsSubmittingAction(true);
+    setActionError(null);
+
+    try {
+      const prepared = await stellarApi.prepareCreateAgreementTx({
+        agreementId: agreement.id,
+        creatorPublicKey: publicKey,
+        paymentTokenAddress:
+          agreement.paymentTokenAddress ||
+          'CB64D3G7SM2RTH6JSGG34DDTFTQAHCFPICX2REJHSWTVRTCVMDU7ACQC',
+        network: agreement.stellarNetwork,
+      });
+
+      const signedXdr = await signTransaction(prepared.unsignedXdr);
+      await stellarApi.submitSignedTx({
+        signedTxXdr: signedXdr,
+        network: agreement.stellarNetwork,
+      });
+
+      addToast({
+        type: 'success',
+        title: 'Agreement Registered On-Chain',
+        message: 'The agreement terms have been registered on Soroban Testnet.',
+      });
+      await loadAgreement();
+    } catch (err: unknown) {
+      setActionError(
+        err instanceof Error ? err.message : 'Failed to register agreement on-chain.',
+      );
+    } finally {
+      setIsSubmittingAction(false);
+    }
+  };
+
+  // 3. Approve split agreement in FairTune
+  const handleApproveInFairTune = async () => {
+    setIsSubmittingAction(true);
+    setActionError(null);
+    try {
+      await agreementsApi.approve(agreement.id);
+      addToast({
+        type: 'success',
+        title: 'Approval Confirmed',
+        message: 'Your approval for this royalty split has been recorded in FairTune.',
+      });
+      await loadAgreement();
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Failed to record approval.');
+    } finally {
+      setIsSubmittingAction(false);
+    }
+  };
+
+  // 4. Sign approval on-chain with Stellar wallet
   const handleApproveWithFreighter = async () => {
-    if (!publicKey) return;
+    if (!publicKey) {
+      connectWallet();
+      return;
+    }
+
+    if (!agreement.onChainAgreementId) {
+      setActionError(
+        'This agreement has not been registered on Stellar Soroban yet. The creator must register it on-chain first, or you can approve the split terms directly in FairTune.',
+      );
+      return;
+    }
+
     setIsSubmittingAction(true);
     setActionError(null);
 
@@ -119,7 +210,7 @@ export const AgreementDetailPage: React.FC = () => {
         network: agreement.stellarNetwork,
       });
 
-      // Step B: Client-side signing with Freighter
+      // Step B: Client-side signing with wallet
       const signedXdr = await signTransaction(prepared.unsignedXdr);
 
       // Step C: Submit signed transaction
@@ -133,12 +224,12 @@ export const AgreementDetailPage: React.FC = () => {
 
       addToast({
         type: 'success',
-        title: 'Approval Confirmed',
-        message: 'Your approval was signed and submitted to Stellar.',
+        title: 'On-Chain Approval Confirmed',
+        message: 'Your approval was signed and confirmed on the Stellar ledger.',
       });
       await loadAgreement();
     } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Failed to approve agreement.');
+      setActionError(err instanceof Error ? err.message : 'Failed to approve agreement on-chain.');
     } finally {
       setIsSubmittingAction(false);
     }
@@ -162,32 +253,40 @@ export const AgreementDetailPage: React.FC = () => {
   // 4. Deposit into Escrow
   const handleDepositEscrow = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!publicKey) {
-      setActionError('Please connect your Freighter wallet to deposit escrow funds.');
-      return;
-    }
-
     setIsSubmittingAction(true);
     setActionError(null);
 
     try {
-      const prepared = await stellarApi.prepareDepositEscrowTx(agreement.id, {
-        depositorPublicKey: publicKey,
-        amount: depositAmount,
-        network: agreement.stellarNetwork,
-      });
+      if (agreement.onChainAgreementId) {
+        if (!publicKey) {
+          setActionError('Please connect your Stellar wallet to deposit on-chain.');
+          setIsSubmittingAction(false);
+          return;
+        }
 
-      const signedXdr = await signTransaction(prepared.unsignedXdr);
-      await stellarApi.submitSignedTx({
-        signedTxXdr: signedXdr,
-        network: agreement.stellarNetwork,
-      });
+        const prepared = await stellarApi.prepareDepositEscrowTx(agreement.id, {
+          depositorPublicKey: publicKey,
+          amount: depositAmount,
+          network: agreement.stellarNetwork,
+        });
+
+        const signedXdr = await signTransaction(prepared.unsignedXdr);
+        await stellarApi.submitSignedTx({
+          signedTxXdr: signedXdr,
+          network: agreement.stellarNetwork,
+        });
+      } else {
+        await agreementsApi.deposit(agreement.id, {
+          amount: depositAmount,
+          asset: depositAsset,
+        });
+      }
 
       setIsDepositOpen(false);
       addToast({
         type: 'success',
         title: 'Deposit Confirmed',
-        message: `Deposited ${depositAmount} ${depositAsset} into Soroban escrow.`,
+        message: `Deposited ${depositAmount} ${depositAsset} into escrow.`,
       });
       await loadAgreement();
     } catch (err: unknown) {
@@ -200,22 +299,32 @@ export const AgreementDetailPage: React.FC = () => {
   // 5. Distribute Royalties
   const handleDistribute = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!publicKey) return;
-
     setIsSubmittingAction(true);
     setActionError(null);
 
     try {
-      const prepared = await stellarApi.prepareDistributeRoyaltiesTx(agreement.id, {
-        callerPublicKey: publicKey,
-        network: agreement.stellarNetwork,
-      });
+      if (agreement.onChainAgreementId) {
+        if (!publicKey) {
+          setActionError('Please connect your Stellar wallet to distribute on-chain.');
+          setIsSubmittingAction(false);
+          return;
+        }
 
-      const signedXdr = await signTransaction(prepared.unsignedXdr);
-      await stellarApi.submitSignedTx({
-        signedTxXdr: signedXdr,
-        network: agreement.stellarNetwork,
-      });
+        const prepared = await stellarApi.prepareDistributeRoyaltiesTx(agreement.id, {
+          callerPublicKey: publicKey,
+          network: agreement.stellarNetwork,
+        });
+
+        const signedXdr = await signTransaction(prepared.unsignedXdr);
+        await stellarApi.submitSignedTx({
+          signedTxXdr: signedXdr,
+          network: agreement.stellarNetwork,
+        });
+      } else {
+        await agreementsApi.distribute(agreement.id, {
+          amount: distributeAmount,
+        });
+      }
 
       setIsDistributeOpen(false);
       addToast({
@@ -231,9 +340,9 @@ export const AgreementDetailPage: React.FC = () => {
     }
   };
 
-  const allApproved = agreement.participants.every(
-    (p) => p.approvalStatus === ApprovalStatus.APPROVED,
-  );
+  const allApproved =
+    participants.length > 0 &&
+    participants.every((p) => p.approvalStatus === ApprovalStatus.APPROVED);
 
   return (
     <div className="space-y-6">
@@ -263,7 +372,7 @@ export const AgreementDetailPage: React.FC = () => {
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               Track: <strong className="text-slate-200">{agreement.trackName}</strong> &bull; Total
-              Allocation: {agreement.totalAllocation}%
+              Allocation: {Number(agreement.totalAllocation).toFixed(2)}%
             </p>
           </div>
         </div>
@@ -278,7 +387,31 @@ export const AgreementDetailPage: React.FC = () => {
               isLoading={isSubmittingAction}
               leftIcon={<Send className="w-3.5 h-3.5" />}
             >
-              Submit for Collaborator Signatures
+              Submit for Signatures
+            </Button>
+          )}
+
+          {!agreement.onChainAgreementId && agreement.status !== AgreementStatus.TERMINATED && (
+            <Button
+              size="sm"
+              variant="stellar"
+              onClick={handleRegisterOnChain}
+              isLoading={isSubmittingAction}
+              leftIcon={<ShieldCheck className="w-3.5 h-3.5" />}
+            >
+              Register on Soroban Testnet
+            </Button>
+          )}
+
+          {canApprove && (
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={handleApproveInFairTune}
+              isLoading={isSubmittingAction}
+              leftIcon={<CheckCircle2 className="w-3.5 h-3.5" />}
+            >
+              Approve Split in FairTune
             </Button>
           )}
 
@@ -290,7 +423,7 @@ export const AgreementDetailPage: React.FC = () => {
               isLoading={isSubmittingAction}
               leftIcon={<ShieldCheck className="w-3.5 h-3.5" />}
             >
-              Sign Approval with Freighter
+              Sign On-Chain with Wallet
             </Button>
           )}
 
@@ -335,6 +468,16 @@ export const AgreementDetailPage: React.FC = () => {
         </Alert>
       )}
 
+      {!agreement.onChainAgreementId && (
+        <Alert variant="warning" title="On-Chain Registration Pending">
+          This agreement terms have been drafted in FairTune but have not yet been registered on the
+          Stellar Soroban testnet. To approve cryptographically on-chain, click{' '}
+          <strong>Register on Soroban Testnet</strong> first to deploy the escrow agreement to the
+          ledger. Alternatively, you can record your approval directly by clicking{' '}
+          <strong>Approve Split in FairTune</strong>.
+        </Alert>
+      )}
+
       {/* Contract & Soroban Info Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -366,10 +509,10 @@ export const AgreementDetailPage: React.FC = () => {
           <div className="text-xs text-slate-400">Approval Threshold</div>
           <div className="text-sm font-semibold text-slate-100 font-mono mt-1">
             {
-              agreement.participants.filter((p) => p.approvalStatus === ApprovalStatus.APPROVED)
+              participants.filter((p) => p.approvalStatus === ApprovalStatus.APPROVED)
                 .length
             }{' '}
-            / {agreement.participants.length} Parties Signed
+            / {participants.length} Parties Signed
           </div>
           <div className="text-[11px] text-slate-500 mt-1">100% consensus required</div>
         </Card>
@@ -382,7 +525,7 @@ export const AgreementDetailPage: React.FC = () => {
         </CardHeader>
 
         <div className="divide-y divide-border-subtle/50 text-xs">
-          {agreement.participants.map((p) => (
+          {participants.map((p) => (
             <div
               key={p.id}
               className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
@@ -399,10 +542,10 @@ export const AgreementDetailPage: React.FC = () => {
               <div className="flex items-center gap-6 sm:text-right">
                 <div>
                   <div className="font-mono font-bold text-sm text-brand-gold">
-                    {p.royaltyPercentage.toFixed(2)}%
+                    {Number(p.royaltyPercentage).toFixed(2)}%
                   </div>
                   <div className="text-[10px] font-mono text-slate-500">
-                    {Math.round(p.royaltyPercentage * 100)} bps
+                    {Math.round(Number(p.royaltyPercentage) * 100)} bps
                   </div>
                 </div>
 
@@ -423,6 +566,72 @@ export const AgreementDetailPage: React.FC = () => {
         </div>
       </Card>
 
+      {/* Escrow Distributions & Payments Table */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Distributed Royalties &amp; Escrow Payouts</CardTitle>
+          <Link to="/payments">
+            <Button size="sm" variant="ghost" className="text-xs text-brand-gold">
+              View All Payments &rarr;
+            </Button>
+          </Link>
+        </CardHeader>
+
+        {!agreement.payments || agreement.payments.length === 0 ? (
+          <div className="py-8 text-center text-slate-400 text-xs">
+            No royalty distributions recorded yet. Once revenue is deposited, collaborator splits
+            will appear here.
+          </div>
+        ) : (
+          <div className="divide-y divide-border-subtle/50 text-xs">
+            {agreement.payments.map((pmt) => (
+              <div
+                key={pmt.id}
+                className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="space-y-0.5">
+                  <div className="font-semibold text-slate-200 text-sm">
+                    {pmt.collaborator?.displayName || 'Collaborator'}
+                  </div>
+                  <div className="font-mono text-[10px] text-slate-500 truncate max-w-sm">
+                    {pmt.recipientAddress}
+                  </div>
+                  {pmt.transactionHash && (
+                    <div className="font-mono text-[10px] text-brand-stellar truncate max-w-xs">
+                      Tx: {pmt.transactionHash}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-6 sm:text-right">
+                  <div>
+                    <div className="font-mono font-bold text-sm text-brand-gold">
+                      +{Number(pmt.amount).toFixed(4)} {pmt.asset?.code || 'XLM'}
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-500">
+                      {new Date(pmt.createdAt).toLocaleDateString()} &bull;{' '}
+                      {new Date(pmt.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </div>
+                  </div>
+
+                  <Badge variant={pmt.status === 'CONFIRMED' ? 'success' : 'warning'} size="sm">
+                    {pmt.status === 'CONFIRMED' ? (
+                      <CheckCircle2 className="w-3 h-3" />
+                    ) : (
+                      <Clock className="w-3 h-3" />
+                    )}
+                    {pmt.status}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
       {/* Deposit Escrow Modal Dialog */}
       <Dialog
         isOpen={isDepositOpen}
@@ -439,7 +648,7 @@ export const AgreementDetailPage: React.FC = () => {
               Cancel
             </Button>
             <Button variant="primary" onClick={handleDepositEscrow} isLoading={isSubmittingAction}>
-              Sign with Freighter
+              {agreement.onChainAgreementId ? 'Sign with Wallet' : 'Confirm Escrow Deposit'}
             </Button>
           </>
         }
@@ -466,8 +675,9 @@ export const AgreementDetailPage: React.FC = () => {
             </select>
           </div>
           <p className="text-[11px] text-slate-400">
-            You will be prompted to sign an unsigned Soroban invocation XDR in your Freighter wallet
-            extension.
+            {agreement.onChainAgreementId
+              ? 'You will be prompted to sign an unsigned Soroban invocation XDR in your connected wallet.'
+              : 'Deposits revenue into the agreement escrow and credits collaborator shares.'}
           </p>
         </form>
       </Dialog>

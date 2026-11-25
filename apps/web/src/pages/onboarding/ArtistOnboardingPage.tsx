@@ -121,7 +121,7 @@ export const ArtistOnboardingPage: React.FC = () => {
               )}
             </div>
             <p className="text-xs text-slate-400">
-              Connect your Freighter wallet to sign agreements on-chain. You can also connect
+              Connect your Stellar wallet to sign agreements on-chain. You can also connect
               anytime later in settings.
             </p>
             {isConnected ? (
@@ -133,7 +133,7 @@ export const ArtistOnboardingPage: React.FC = () => {
                 type="button"
                 size="sm"
                 variant="stellar"
-                onClick={openConnectModal}
+                onClick={connectWallet}
                 isLoading={isConnecting}
               >
                 Connect Stellar Wallet

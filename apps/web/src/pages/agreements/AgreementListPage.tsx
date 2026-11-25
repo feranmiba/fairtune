@@ -126,14 +126,14 @@ export const AgreementListPage: React.FC = () => {
                       <Users className="w-3.5 h-3.5" /> Collaborators:
                     </span>
                     <span className="font-mono text-slate-200">
-                      {agr.participants.length} parties
+                      {(agr.participants || []).length} parties
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-slate-400">
                     <span>Allocated Split:</span>
                     <span className="font-mono text-brand-gold font-bold">
-                      {agr.totalAllocation}%
+                      {Number(agr.totalAllocation).toFixed(2)}%
                     </span>
                   </div>
 

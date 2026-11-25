@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { StellarWalletProvider } from './context/StellarWalletContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Layouts
 import { PublicLayout } from './layouts/PublicLayout';
@@ -38,53 +39,55 @@ export const App: React.FC = () => {
       <AuthProvider>
         <StellarWalletProvider>
           <NotificationProvider>
-            <Routes>
-              {/* Marketing & Landing */}
-              <Route element={<PublicLayout />}>
-                <Route path="/" element={<LandingPage />} />
-              </Route>
+            <ErrorBoundary>
+              <Routes>
+                {/* Marketing & Landing */}
+                <Route element={<PublicLayout />}>
+                  <Route path="/" element={<LandingPage />} />
+                </Route>
 
-              {/* Auth Routes */}
-              <Route element={<AuthLayout />}>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-              </Route>
+                {/* Auth Routes */}
+                <Route element={<AuthLayout />}>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                </Route>
 
-              {/* Onboarding */}
-              <Route
-                path="/onboarding"
-                element={
-                  <ProtectedRoute>
-                    <ArtistOnboardingPage />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Onboarding */}
+                <Route
+                  path="/onboarding"
+                  element={
+                    <ProtectedRoute>
+                      <ArtistOnboardingPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Main Authenticated App */}
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <AppLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/contracts" element={<ContractListPage />} />
-                <Route path="/contracts/:id" element={<ContractDetailPage />} />
-                <Route path="/contracts/chat" element={<ContractChatPage />} />
-                <Route path="/agreements" element={<AgreementListPage />} />
-                <Route path="/agreements/create" element={<AgreementCreatePage />} />
-                <Route path="/agreements/:id" element={<AgreementDetailPage />} />
-                <Route path="/payments" element={<PaymentHistoryPage />} />
-                <Route path="/intelligence" element={<RoyaltyAnalyticsPage />} />
-                <Route path="/anomalies" element={<AnomalyListPage />} />
-                <Route path="/wallet" element={<WalletSettingsPage />} />
-                <Route path="/profile" element={<ArtistProfilePage />} />
-              </Route>
+                {/* Main Authenticated App */}
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/contracts" element={<ContractListPage />} />
+                  <Route path="/contracts/:id" element={<ContractDetailPage />} />
+                  <Route path="/contracts/chat" element={<ContractChatPage />} />
+                  <Route path="/agreements" element={<AgreementListPage />} />
+                  <Route path="/agreements/create" element={<AgreementCreatePage />} />
+                  <Route path="/agreements/:id" element={<AgreementDetailPage />} />
+                  <Route path="/payments" element={<PaymentHistoryPage />} />
+                  <Route path="/intelligence" element={<RoyaltyAnalyticsPage />} />
+                  <Route path="/anomalies" element={<AnomalyListPage />} />
+                  <Route path="/wallet" element={<WalletSettingsPage />} />
+                  <Route path="/profile" element={<ArtistProfilePage />} />
+                </Route>
 
-              {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </ErrorBoundary>
           </NotificationProvider>
         </StellarWalletProvider>
       </AuthProvider>

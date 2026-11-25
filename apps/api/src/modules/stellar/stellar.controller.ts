@@ -150,7 +150,7 @@ export class StellarController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('agreements/prepare')
+  @Post(['agreements/prepare', 'agreements/register/prepare'])
   @ApiOperation({
     summary:
       'Build and simulate an unsigned transaction to register a proposed royalty agreement on Soroban',

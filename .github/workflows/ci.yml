@@ -73,3 +73,14 @@ jobs:
           REDIS_PORT: 6379
           JWT_ACCESS_SECRET: test_jwt_access_secret_for_ci_environment_32chars
           JWT_REFRESH_SECRET: test_jwt_refresh_secret_for_ci_environment_32chars
+
+      - name: Set up Rust toolchain for Soroban
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Run Soroban smart contract tests
+        run: cargo test --manifest-path contracts/royalty-agreement/Cargo.toml
+
+      - name: Build all packages and applications
+        run: pnpm build

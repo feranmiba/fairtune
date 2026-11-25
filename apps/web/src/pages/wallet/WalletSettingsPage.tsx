@@ -88,7 +88,7 @@ export const WalletSettingsPage: React.FC = () => {
             Stellar Wallet &amp; Network
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Connect your non-custodial Freighter wallet to sign royalty agreements and receive
+            Connect your non-custodial Stellar wallet to sign royalty agreements and receive
             automated payouts.
           </p>
         </div>
@@ -112,7 +112,7 @@ export const WalletSettingsPage: React.FC = () => {
             <Button
               size="sm"
               variant="stellar"
-              onClick={openConnectModal}
+              onClick={connectWallet}
               isLoading={isConnecting}
               leftIcon={<Wallet className="w-3.5 h-3.5" />}
             >
@@ -134,8 +134,8 @@ export const WalletSettingsPage: React.FC = () => {
         <div>
           <strong className="text-slate-100 block mb-0.5">Strict Non-Custodial Protocol:</strong>
           FairTune never asks for or stores private keys. Transactions are prepared as unsigned
-          Base64 envelopes and signed in your browser via the official Varial / Freighter wallet
-          extension.
+          Base64 envelopes and signed in your browser via the official Stellar Wallets Kit
+          (supporting Varial, Freighter, xBull, Albedo, Lobstr, Hana, and hardware signers).
         </div>
       </div>
 
@@ -207,7 +207,7 @@ export const WalletSettingsPage: React.FC = () => {
 
           {!isConnected ? (
             <p className="text-xs text-slate-500 py-8 text-center italic">
-              Connect your Freighter wallet to view live testnet balances.
+              Connect your Stellar wallet to view live testnet balances.
             </p>
           ) : balances.length === 0 ? (
             <p className="text-xs text-slate-500 py-8 text-center">
