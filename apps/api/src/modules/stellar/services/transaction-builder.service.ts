@@ -6,6 +6,7 @@ import {
   nativeToScVal,
   rpc,
   TransactionBuilder,
+  xdr,
 } from '@stellar/stellar-sdk';
 import { StellarNetworkService } from './stellar-network.service';
 import { SorobanContractService } from './soroban-contract.service';
@@ -109,12 +110,20 @@ export class TransactionBuilderService {
     }
     const hashBuffer = Buffer.from(cleanHash, 'hex');
 
-    // Convert participants to Soroban ScVal
-    const participantsScVal = nativeToScVal(
-      params.participants.map((p) => ({
-        address: Address.fromString(p.address),
-        basis_points: p.basisPoints,
-      })),
+    // Convert participants to Soroban ScVal with exact u32 basis points
+    const participantsScVal = xdr.ScVal.scvVec(
+      params.participants.map((p) =>
+        xdr.ScVal.scvMap([
+          new xdr.ScMapEntry({
+            key: xdr.ScVal.scvSymbol('address'),
+            val: Address.fromString(p.address).toScVal(),
+          }),
+          new xdr.ScMapEntry({
+            key: xdr.ScVal.scvSymbol('basis_points'),
+            val: xdr.ScVal.scvU32(p.basisPoints),
+          }),
+        ]),
+      ),
     );
 
     const op = contract.call(

@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "message": "Successfully deposited 100.00 XLM into escrow and credited collaborator shares.",
+  "depositAmount": "100.00",
+  "asset": "XLM",
+  "transactionHash": "dep_1795613453968_uwf9x6o",
+  "paymentsCount": 3
+}

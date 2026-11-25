@@ -1,0 +1,43 @@
+{
+  "user": {
+    "id": "9902bb58-9371-41bc-9867-68e2766c43cc",
+    "email": "maya.lin.1795613369799@fairtune.io",
+    "firstName": "Maya",
+    "lastName": "Lin",
+    "role": "ARTIST",
+    "emailVerified": false,
+    "createdAt": "2026-11-25T13:29:53.899Z",
+    "updatedAt": "2026-11-25T13:29:53.899Z",
+    "artistProfile": {
+      "id": "c2322a92-471f-41ba-bd93-428f55dc8e72",
+      "userId": "9902bb58-9371-41bc-9867-68e2766c43cc",
+      "stageName": "Maya Lin",
+      "bio": null,
+      "profileImage": null,
+      "country": null,
+      "createdAt": "2026-11-25T13:29:53.899Z",
+      "updatedAt": "2026-11-25T13:29:53.899Z"
+    }
+  },
+  "profile": {
+    "id": "9902bb58-9371-41bc-9867-68e2766c43cc",
+    "email": "maya.lin.1795613369799@fairtune.io",
+    "firstName": "Maya",
+    "lastName": "Lin",
+    "role": "ARTIST",
+    "emailVerified": false,
+    "createdAt": "2026-11-25T13:29:53.899Z",
+    "updatedAt": "2026-11-25T13:29:53.899Z",
+    "artistProfile": {
+      "id": "c2322a92-471f-41ba-bd93-428f55dc8e72",
+      "userId": "9902bb58-9371-41bc-9867-68e2766c43cc",
+      "stageName": "Maya Lin",
+      "bio": "Electronic & ambient indie recording artist.",
+      "profileImage": null,
+      "country": null,
+      "createdAt": "2026-11-25T13:29:53.899Z",
+      "updatedAt": "2026-11-25T13:29:53.945Z"
+    }
+  },
+  "connectedWallet": "GA5WKVROHSUPZO63SMX5LVUSLSFXCBWEKTSXT5XADWAGLVQAKRVVW6W4"
+}

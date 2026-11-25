@@ -1,0 +1,16 @@
+{
+  "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+  "collaboratorA": {
+    "name": "Marcus Cole",
+    "publicKey": "GAYFWAYEKGODYTEWJZYQ5D24UBKKGOPLGABTJGHAYLBBCEGZ4PPULU5Y",
+    "approvalTxHash": "e90fdb60b7daefa1ff476adc7bcaa55aa9e82d4d22ab5a0a7b850144dd2c2ce2",
+    "ledger": 5917961
+  },
+  "collaboratorB": {
+    "name": "Chloe Bennett",
+    "publicKey": "GDGDAPELAWN43CXDKODC36C2IHZANA7J5JFTVZR5S3632W5VOVN46R3Q",
+    "approvalTxHash": "94aa1ce0b46cf6de0a2248d6489ecb83979258f7ae5eae69082d9586cc981f7b",
+    "ledger": 5917962
+  },
+  "status": "ACTIVE"
+}

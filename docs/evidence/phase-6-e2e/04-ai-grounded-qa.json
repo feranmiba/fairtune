@@ -1,0 +1,40 @@
+{
+  "conversationId": "12acb048-e28c-41bd-a8d1-04af8d923608",
+  "question": "What percentage of royalties does the artist receive under this agreement, and which section establishes that allocation?",
+  "assistantResponse": {
+    "id": "18d455a8-bb5a-4662-903c-0128ba7da850",
+    "conversationId": "12acb048-e28c-41bd-a8d1-04af8d923608",
+    "sender": "ASSISTANT",
+    "content": "### Royalty Distribution & Escrow Analysis\n\nAccording to **Section 4 (Royalty Distribution and Escrow Splits)** of your agreement:\n\n* **Digital Streaming Split (Section 4.1):** You receive **50.0% of all Net Receipts** derived from interactive digital streaming (Spotify, Apple Music, TIDAL, Amazon Music).\n* **Sync & Licensing Split (Section 4.2):** Net receipts from synchronization licensing in films, TV, video games, or commercial advertisements are divided **50/50** between Artist and Company.\n* **On-Chain Collaborator Allocations (Section 4.3):**\n  * **Marcus Vance (Lead Artist):** 50.00% split\n  * **Astral Soundworks LLC (Company):** 30.00% split\n  * **Elena Rostova (Producer):** 20.00% split\n* **Settlement Mechanism (Section 5):** Monthly distributions are executed on-chain via **Stellar Soroban smart contracts** in Stellar USDC or native Lumens (XLM), with deterministic stroop rounding rules preventing remainder leakage.\n\n**Watch-out:** Ensure \"Net Receipts\" has a defined cap on marketing and platform deductions so the label cannot reduce your net distributable pool.",
+    "role": "assistant",
+    "promptTokens": 699,
+    "completionTokens": 273,
+    "totalTokens": 972,
+    "model": "fairtune-legal-intelligence-v1",
+    "createdAt": "2026-11-25T13:30:34.542Z",
+    "references": [
+      {
+        "id": "82299e0e-60bd-4f55-9c42-1d45eab969d9",
+        "messageId": "18d455a8-bb5a-4662-903c-0128ba7da850",
+        "documentId": "56d16df8-3a21-47fb-9ad7-529e109b4ab0",
+        "chunkId": "2f1ec712-0cf4-4ca6-a580-773e2b020a8e",
+        "clauseId": null,
+        "sourcePage": 1,
+        "sourceExcerpt": "[EXCLUSIVE ARTIST RECORDING & ROYALTY DISTRIBUTION AGREEMENT ]\nEXCLUSIVE ARTIST RECORDING & ROYALTY DISTRIBUTION AGREEMENT Dated as of November 15, 2026 This EXCLUSIVE ARTIST RECORDING & ROYALTY DISTRIBUTION AGREEMENT (the \"Agreement\") is entered into by and between ASTRAL SOUNDWORKS RECORDS LLC, a ",
+        "relevanceScore": "0.6841",
+        "createdAt": "2026-11-25T13:30:34.549Z"
+      },
+      {
+        "id": "065de0a7-9231-436e-bfb7-037e91107adc",
+        "messageId": "18d455a8-bb5a-4662-903c-0128ba7da850",
+        "documentId": "56d16df8-3a21-47fb-9ad7-529e109b4ab0",
+        "chunkId": "8bc9ba7e-b0a3-4530-8af6-6083856370ce",
+        "clauseId": null,
+        "sourcePage": 2,
+        "sourceExcerpt": "[EXCLUSIVE ARTIST RECORDING & ROYALTY DISTRIBUTION AGREEMENT ]\nEXCLUSIVE ARTIST RECORDING & ROYALTY DISTRIBUTION AGREEMENT (PAGE 2) SECTION 4. ROYALTY DISTRIBUTION AND ESCROW SPLITS 4.1 Streaming Royalty Split: Company shall credit and disburse to Artist fifty percent (50.0%) of all Net Receipts der",
+        "relevanceScore": "-0.8493",
+        "createdAt": "2026-11-25T13:30:34.553Z"
+      }
+    ]
+  }
+}

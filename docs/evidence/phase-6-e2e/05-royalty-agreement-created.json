@@ -1,0 +1,81 @@
+{
+  "id": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+  "creatorId": "9902bb58-9371-41bc-9867-68e2766c43cc",
+  "title": "Midnight Dreams Master & Publishing Split",
+  "trackName": "Midnight Dreams",
+  "description": "Official production & songwriting split for Midnight Dreams.",
+  "status": "PENDING_APPROVAL",
+  "totalAllocation": "100",
+  "stellarNetwork": "TESTNET",
+  "contractAddress": null,
+  "onChainAgreementId": null,
+  "metadataHash": null,
+  "paymentTokenAddress": null,
+  "onChainStatus": null,
+  "lastSyncedLedger": null,
+  "lastSyncedAt": null,
+  "createdAt": "2026-11-25T13:30:34.608Z",
+  "updatedAt": "2026-11-25T13:30:34.608Z",
+  "participants": [
+    {
+      "id": "f0005718-30d2-462b-8c51-5ffa96170eb1",
+      "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+      "collaboratorId": "30d6a43f-602e-42f2-af99-2898525a46b6",
+      "royaltyPercentage": "50",
+      "approvalStatus": "PENDING",
+      "approvedAt": null,
+      "onChainApproved": false,
+      "onChainTxHash": null,
+      "collaborator": {
+        "id": "30d6a43f-602e-42f2-af99-2898525a46b6",
+        "userId": null,
+        "displayName": "Maya Lin",
+        "walletAddress": "GA5WKVROHSUPZO63SMX5LVUSLSFXCBWEKTSXT5XADWAGLVQAKRVVW6W4",
+        "createdAt": "2026-11-25T13:30:34.577Z",
+        "updatedAt": "2026-11-25T13:30:34.577Z"
+      }
+    },
+    {
+      "id": "c95aa623-5e45-401d-a3ea-e7f85f2878a2",
+      "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+      "collaboratorId": "97ec77da-1608-48d4-b7c5-ad1c259b8128",
+      "royaltyPercentage": "30",
+      "approvalStatus": "PENDING",
+      "approvedAt": null,
+      "onChainApproved": false,
+      "onChainTxHash": null,
+      "collaborator": {
+        "id": "97ec77da-1608-48d4-b7c5-ad1c259b8128",
+        "userId": null,
+        "displayName": "Marcus Cole",
+        "walletAddress": "GAYFWAYEKGODYTEWJZYQ5D24UBKKGOPLGABTJGHAYLBBCEGZ4PPULU5Y",
+        "createdAt": "2026-11-25T13:30:34.595Z",
+        "updatedAt": "2026-11-25T13:30:34.595Z"
+      }
+    },
+    {
+      "id": "c2d1b949-a063-4058-a810-08c034e4780c",
+      "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+      "collaboratorId": "29cff035-11aa-47db-9f3a-15e5f5476fbf",
+      "royaltyPercentage": "20",
+      "approvalStatus": "PENDING",
+      "approvedAt": null,
+      "onChainApproved": false,
+      "onChainTxHash": null,
+      "collaborator": {
+        "id": "29cff035-11aa-47db-9f3a-15e5f5476fbf",
+        "userId": null,
+        "displayName": "Chloe Bennett",
+        "walletAddress": "GDGDAPELAWN43CXDKODC36C2IHZANA7J5JFTVZR5S3632W5VOVN46R3Q",
+        "createdAt": "2026-11-25T13:30:34.603Z",
+        "updatedAt": "2026-11-25T13:30:34.603Z"
+      }
+    }
+  ],
+  "creator": {
+    "id": "9902bb58-9371-41bc-9867-68e2766c43cc",
+    "email": "maya.lin.1795613369799@fairtune.io",
+    "firstName": "Maya",
+    "lastName": "Lin"
+  }
+}

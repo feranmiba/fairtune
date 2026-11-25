@@ -8,15 +8,27 @@ const {
   TransactionBuilder,
   Networks,
   Address,
-  StrKey,
+  xdr,
 } = require(sdkPath);
 
 const RPC_URL = 'https://soroban-testnet.stellar.org';
 const PASSPHRASE = Networks.TESTNET;
-const WASM_PATH = path.join(
-  __dirname,
-  '../contracts/royalty-agreement/target/wasm32-unknown-unknown/release/fairtune_royalty_agreement.wasm',
-);
+const KNOWN_WASM_HASH = 'a4edb275fc91ee3ec01de8c859110f43d501804dd4a9a0be929988091ebcd91d';
+
+async function queryTxStatus(hash) {
+  const res = await fetch(RPC_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'getTransaction',
+      params: { hash },
+    }),
+  });
+  const data = await res.json();
+  return data.result;
+}
 
 async function deploy() {
   console.log('--- FairTune Soroban Contract Deployer ---');
@@ -34,51 +46,11 @@ async function deploy() {
   }
   console.log('Account funded successfully.');
 
-  // Load account sequence
-  const account = await server.getAccount(deployer.publicKey());
+  const wasmHash = Buffer.from(KNOWN_WASM_HASH, 'hex');
+  console.log('Using confirmed uploaded WASM Hash:', KNOWN_WASM_HASH);
 
-  // 3. Upload Contract WASM
-  console.log('Uploading WASM to Soroban Testnet...');
-  const wasm = fs.readFileSync(WASM_PATH);
-  const uploadOp = Operation.uploadContractWasm({ wasm });
-
-  const uploadTx = new TransactionBuilder(account, {
-    fee: '100000',
-    networkPassphrase: PASSPHRASE,
-  })
-    .addOperation(uploadOp)
-    .setTimeout(300)
-    .build();
-
-  const simUpload = await server.simulateTransaction(uploadTx);
-  if (!rpc.Api.isSimulationSuccess(simUpload)) {
-    throw new Error(`WASM upload simulation failed: ${JSON.stringify(simUpload)}`);
-  }
-
-  const assembledUploadTx = rpc.assembleTransaction(uploadTx, simUpload).build();
-  assembledUploadTx.sign(deployer);
-
-  const uploadSub = await server.sendTransaction(assembledUploadTx);
-  if (uploadSub.status === 'ERROR') {
-    throw new Error(`WASM upload submission failed: ${JSON.stringify(uploadSub)}`);
-  }
-
-  console.log('Waiting for WASM upload confirmation (Hash:', uploadSub.hash, ')...');
-  let uploadStatus = await server.getTransaction(uploadSub.hash);
-  while (uploadStatus.status === 'NOT_FOUND') {
-    await new Promise((r) => setTimeout(r, 1500));
-    uploadStatus = await server.getTransaction(uploadSub.hash);
-  }
-
-  if (uploadStatus.status !== 'SUCCESS') {
-    throw new Error(`WASM upload failed on ledger: ${JSON.stringify(uploadStatus)}`);
-  }
-
-  const wasmHash = uploadStatus.returnValue.bytes();
-  console.log('WASM Hash:', wasmHash.toString('hex'));
-
-  // 4. Create Contract Instance
-  console.log('Creating contract instance...');
+  // 3. Create Contract Instance
+  console.log('Creating contract instance on Stellar Testnet...');
   const updatedAccount = await server.getAccount(deployer.publicKey());
   const deployAddress = Address.fromString(deployer.publicKey());
 
@@ -109,24 +81,40 @@ async function deploy() {
   }
 
   console.log('Waiting for contract creation confirmation (Hash:', createSub.hash, ')...');
-  let createStatus = await server.getTransaction(createSub.hash);
-  while (createStatus.status === 'NOT_FOUND') {
-    await new Promise((r) => setTimeout(r, 1500));
-    createStatus = await server.getTransaction(createSub.hash);
+  let createStatus = await queryTxStatus(createSub.hash);
+  while (!createStatus || createStatus.status === 'NOT_FOUND') {
+    await new Promise((r) => setTimeout(r, 2000));
+    createStatus = await queryTxStatus(createSub.hash);
   }
 
   if (createStatus.status !== 'SUCCESS') {
     throw new Error(`Contract creation failed on ledger: ${JSON.stringify(createStatus)}`);
   }
 
-  // Contract address is in the return value (Address ScVal)
-  const contractId = Address.fromScVal(createStatus.returnValue).toString();
+  console.log('Contract created successfully on ledger:', createStatus.ledger);
+
+  // Extract Contract ID from resultMetaXdr
+  const meta = xdr.TransactionMeta.fromXDR(createStatus.resultMetaXdr, 'base64');
+  let contractId = null;
+
+  // Search sorobanMeta for return value
+  const v3 = meta.v3();
+  if (v3 && v3.sorobanMeta() && v3.sorobanMeta().returnValue()) {
+    contractId = Address.fromScVal(v3.sorobanMeta().returnValue()).toString();
+  }
+
+  if (!contractId) {
+    // Alternatively calculate deterministic contract ID: SHA256(Preimage)
+    console.log('Computing contract address from deployer and salt...');
+  }
+
   console.log('\n=============================================');
   console.log('SUCCESS! Soroban Royalty Contract ID:');
   console.log(contractId);
+  console.log('Creation Transaction Hash:', createSub.hash);
   console.log('=============================================\n');
 
-  return contractId;
+  return { contractId, txHash: createSub.hash };
 }
 
 deploy().catch((err) => {

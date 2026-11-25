@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-11-25T13:29:53.794Z",
+  "network": "TESTNET",
+  "horizonUrl": "https://horizon-testnet.stellar.org",
+  "contractId": "CDYV5DOJJUW5CGSSVP4ISPFLAHVX4YYJ7LMP75ZQTX3WEPS6DTECJSR2",
+  "accounts": {
+    "artist": {
+      "role": "Lead Artist (50%)",
+      "publicKey": "GA5WKVROHSUPZO63SMX5LVUSLSFXCBWEKTSXT5XADWAGLVQAKRVVW6W4",
+      "initialBalance": "10000.0000000"
+    },
+    "collaboratorA": {
+      "role": "Producer (30%)",
+      "publicKey": "GAYFWAYEKGODYTEWJZYQ5D24UBKKGOPLGABTJGHAYLBBCEGZ4PPULU5Y",
+      "initialBalance": "10000.0000000"
+    },
+    "collaboratorB": {
+      "role": "Songwriter (20%)",
+      "publicKey": "GDGDAPELAWN43CXDKODC36C2IHZANA7J5JFTVZR5S3632W5VOVN46R3Q",
+      "initialBalance": "10000.0000000"
+    }
+  }
+}

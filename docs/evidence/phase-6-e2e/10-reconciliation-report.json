@@ -1,0 +1,9 @@
+{
+  "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+  "expectedDeposit": "100.0000000",
+  "confirmedDeposit": "100.0000000",
+  "expectedDistribution": "100.0000000",
+  "confirmedDistribution": "100.0000000",
+  "discrepancy": "0.0000000",
+  "status": "MATCHED"
+}

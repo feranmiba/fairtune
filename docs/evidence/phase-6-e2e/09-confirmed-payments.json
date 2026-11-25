@@ -1,0 +1,116 @@
+{
+  "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+  "totalDeposited": "100.00 XLM",
+  "totalDistributed": "100.00 XLM",
+  "zeroRemainderVerified": true,
+  "payments": [
+    {
+      "id": "ea5b38a8-ed5f-4c08-9a72-93ee95641dd3",
+      "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+      "collaboratorId": "29cff035-11aa-47db-9f3a-15e5f5476fbf",
+      "recipientAddress": "GDGDAPELAWN43CXDKODC36C2IHZANA7J5JFTVZR5S3632W5VOVN46R3Q",
+      "amount": "20",
+      "amountSubunits": "200000000",
+      "assetId": "7388b4d6-d21a-4e8d-98c5-3811e60b54bd",
+      "transactionHash": "dep_1795613453968_uwf9x6o_c2d1b9",
+      "status": "CONFIRMED",
+      "failureReason": null,
+      "ledgerSequence": 5916444,
+      "confirmedAt": "2026-11-25T13:30:53.978Z",
+      "createdAt": "2026-11-25T13:30:53.978Z",
+      "updatedAt": "2026-11-25T13:30:53.978Z",
+      "asset": {
+        "id": "7388b4d6-d21a-4e8d-98c5-3811e60b54bd",
+        "code": "XLM",
+        "name": "Native Stellar Lumens",
+        "contractAddress": "CB64D3G7SM2RTH6JSGG34DDTFTQAHCFPICX2REJHSWTVRTCVMDU7ACQC",
+        "issuerPublicKey": null,
+        "decimals": 7,
+        "network": "TESTNET",
+        "isActive": true,
+        "createdAt": "2026-11-25T11:50:39.098Z",
+        "updatedAt": "2026-11-25T11:50:39.098Z"
+      },
+      "collaborator": {
+        "id": "29cff035-11aa-47db-9f3a-15e5f5476fbf",
+        "userId": null,
+        "displayName": "Chloe Bennett",
+        "walletAddress": "GDGDAPELAWN43CXDKODC36C2IHZANA7J5JFTVZR5S3632W5VOVN46R3Q",
+        "createdAt": "2026-11-25T13:30:34.603Z",
+        "updatedAt": "2026-11-25T13:30:34.603Z"
+      }
+    },
+    {
+      "id": "c4dc4b83-b499-4989-b5c3-fa5e0ef0bf5d",
+      "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+      "collaboratorId": "97ec77da-1608-48d4-b7c5-ad1c259b8128",
+      "recipientAddress": "GAYFWAYEKGODYTEWJZYQ5D24UBKKGOPLGABTJGHAYLBBCEGZ4PPULU5Y",
+      "amount": "30",
+      "amountSubunits": "300000000",
+      "assetId": "7388b4d6-d21a-4e8d-98c5-3811e60b54bd",
+      "transactionHash": "dep_1795613453968_uwf9x6o_c95aa6",
+      "status": "CONFIRMED",
+      "failureReason": null,
+      "ledgerSequence": 5916444,
+      "confirmedAt": "2026-11-25T13:30:53.975Z",
+      "createdAt": "2026-11-25T13:30:53.976Z",
+      "updatedAt": "2026-11-25T13:30:53.976Z",
+      "asset": {
+        "id": "7388b4d6-d21a-4e8d-98c5-3811e60b54bd",
+        "code": "XLM",
+        "name": "Native Stellar Lumens",
+        "contractAddress": "CB64D3G7SM2RTH6JSGG34DDTFTQAHCFPICX2REJHSWTVRTCVMDU7ACQC",
+        "issuerPublicKey": null,
+        "decimals": 7,
+        "network": "TESTNET",
+        "isActive": true,
+        "createdAt": "2026-11-25T11:50:39.098Z",
+        "updatedAt": "2026-11-25T11:50:39.098Z"
+      },
+      "collaborator": {
+        "id": "97ec77da-1608-48d4-b7c5-ad1c259b8128",
+        "userId": null,
+        "displayName": "Marcus Cole",
+        "walletAddress": "GAYFWAYEKGODYTEWJZYQ5D24UBKKGOPLGABTJGHAYLBBCEGZ4PPULU5Y",
+        "createdAt": "2026-11-25T13:30:34.595Z",
+        "updatedAt": "2026-11-25T13:30:34.595Z"
+      }
+    },
+    {
+      "id": "e0238b3d-336b-41b6-932f-9af42cda0912",
+      "agreementId": "ab55752c-f2cf-43be-8d5a-06f55f22aa8f",
+      "collaboratorId": "30d6a43f-602e-42f2-af99-2898525a46b6",
+      "recipientAddress": "GA5WKVROHSUPZO63SMX5LVUSLSFXCBWEKTSXT5XADWAGLVQAKRVVW6W4",
+      "amount": "50",
+      "amountSubunits": "500000000",
+      "assetId": "7388b4d6-d21a-4e8d-98c5-3811e60b54bd",
+      "transactionHash": "dep_1795613453968_uwf9x6o_f00057",
+      "status": "CONFIRMED",
+      "failureReason": null,
+      "ledgerSequence": 5916444,
+      "confirmedAt": "2026-11-25T13:30:53.972Z",
+      "createdAt": "2026-11-25T13:30:53.973Z",
+      "updatedAt": "2026-11-25T13:30:53.973Z",
+      "asset": {
+        "id": "7388b4d6-d21a-4e8d-98c5-3811e60b54bd",
+        "code": "XLM",
+        "name": "Native Stellar Lumens",
+        "contractAddress": "CB64D3G7SM2RTH6JSGG34DDTFTQAHCFPICX2REJHSWTVRTCVMDU7ACQC",
+        "issuerPublicKey": null,
+        "decimals": 7,
+        "network": "TESTNET",
+        "isActive": true,
+        "createdAt": "2026-11-25T11:50:39.098Z",
+        "updatedAt": "2026-11-25T11:50:39.098Z"
+      },
+      "collaborator": {
+        "id": "30d6a43f-602e-42f2-af99-2898525a46b6",
+        "userId": null,
+        "displayName": "Maya Lin",
+        "walletAddress": "GA5WKVROHSUPZO63SMX5LVUSLSFXCBWEKTSXT5XADWAGLVQAKRVVW6W4",
+        "createdAt": "2026-11-25T13:30:34.577Z",
+        "updatedAt": "2026-11-25T13:30:34.577Z"
+      }
+    }
+  ]
+}

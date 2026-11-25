@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { rpc, TransactionBuilder } from '@stellar/stellar-sdk';
+import { TransactionBuilder } from '@stellar/stellar-sdk';
 import { PrismaService } from '../../../database/prisma.service';
 import { StellarNetworkService } from './stellar-network.service';
 import { SorobanContractService } from './soroban-contract.service';
@@ -41,27 +41,46 @@ export class AgreementSyncService {
     const sendRes = await rpcServer.sendTransaction(tx);
 
     if (sendRes.status === 'ERROR') {
+      this.logger.error(`SendTransaction rejected: ${JSON.stringify(sendRes)}`);
       throw new BadRequestException(
-        `Transaction submission failed: ${sendRes.errorResult?.toString() || 'Unknown error'}`,
+        `Transaction submission failed: ${sendRes.errorResult?.toString() || JSON.stringify(sendRes)}`,
       );
     }
 
-    // Poll for status confirmation (up to 10 attempts with exponential backoff)
-    let getTxRes: rpc.Api.GetTransactionResponse = await rpcServer.getTransaction(txHash);
+    // Poll for status confirmation via direct JSON-RPC to avoid SDK union parser mismatches
+    let getTxRes: any = null;
     let attempts = 0;
-    while (getTxRes.status === 'NOT_FOUND' && attempts < 10) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      getTxRes = await rpcServer.getTransaction(txHash);
+    while (attempts < 15) {
+      try {
+        const rawRes = await fetch(this.networkService.getRpcUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getTransaction',
+            params: { hash: txHash },
+          }),
+        });
+        const json = await rawRes.json() as any;
+        getTxRes = json.result;
+        if (getTxRes && getTxRes.status !== 'NOT_FOUND') {
+          break;
+        }
+      } catch (err) {
+        this.logger.warn(`Polling status warning: ${err}`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       attempts++;
     }
 
-    const isSuccess = getTxRes.status === 'SUCCESS';
+    const isSuccess = getTxRes?.status === 'SUCCESS';
     const status = isSuccess ? TransactionStatus.SUCCESS : TransactionStatus.FAILED;
 
     return {
       hash: txHash,
       status,
-      ledger: getTxRes.latestLedger,
+      ledger: getTxRes?.ledger || getTxRes?.latestLedger,
       createdAt: new Date().toISOString(),
       rawResult: getTxRes,
     };
